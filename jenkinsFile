@@ -1,0 +1,8 @@
+pipeline {
+  agent any
+  post {
+    always {
+      notify( endpoint: "https://api.flock.com/hooks/sendMessage/fa109ee8-b6e7-45a5-8342-e24066772712", message: "Project Name: hello-webapp-world </br>" )
+    }
+  }
+}
