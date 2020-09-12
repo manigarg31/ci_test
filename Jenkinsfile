@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git branch: 'mani' , url: 'https://github.com/manigarg31/ci_test.git'
+        git branch: 'mani', url: 'https://github.com/manigarg31/ci_test.git'
       }
     }
     stage('Building image') {
