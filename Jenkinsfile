@@ -4,11 +4,13 @@ pipeline {
         registry = "manigarg/hello-world-webapp"
         registryCredential = 'dockerhub'
         dockerImage = ''
+        GIT_BRANCH = 'master'
         }
   stages {
     stage('Cloning Git') {
       steps {
-        git branch: 'master', url: 'https://github.com/manigarg31/ci_test.git'
+        sh 'git checkout ${GIT_BRANCH}'
+        git 'https://github.com/manigarg31/ci_test.git'
       }
     }
     stage('Building image') {
