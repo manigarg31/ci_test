@@ -1,14 +1,14 @@
 pipeline {
-  environment {
-    registry = "manigarg/hello-world-app"
-    registryCredential = 'dockerhub'
-    dockerImage = ''
-  }
-  agent any
-  stages {
-    stage('Cloning Git') {
+    agent any
+    environment {
+        registry = "manigarg/hello-world-webapp"
+        registryCredential = 'dockerhub'
+        dockerImage = ''
+        }
+    stages {
+        stage('Cloning Git') {
       steps {
-        git branch: master,url: 'https://github.com/manigarg31/ci_test.git'
+        git 'https://github.com/manigarg31/ci_test.git'
       }
     }
     stage('Building image') {
@@ -32,8 +32,6 @@ pipeline {
         sh "docker rmi $registry:$BUILD_NUMBER"
       }
     }
-  }
-
 
             post {
                 always {
@@ -53,3 +51,4 @@ pipeline {
         }
     }
 }
+
