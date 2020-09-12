@@ -1,29 +1,39 @@
 pipeline {
-    agent any
-    environment {
-        registry = "manigarg/hello-world-webapp"
-        registryCredential = 'dockerhub'
-        dockerImage = ''
+  environment {
+    registry = "manigarg/hello-world-app"
+    registryCredential = 'dockerhub'
+    dockerImage = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git branch: master,url: 'https://github.com/manigarg31/ci_test.git'
+      }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
-    stages {
-        stage('Initialize'){
-            steps {
-                script {
-                    def dockerHome = tool 'myDocker'
-                    env.PATH = "${dockerHome}/bin:${env.PATH}"
-                }
-            }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
         }
-        stage('Build') {
-            steps {
-                script {
-                    git branch: 'master' ,url: 'https://github.com/manigarg31/ci_test.git'
-                    dockerImage = docker.build registry + ":latest"
-                    docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
-                    }
-                }
-            }
+      }
+    }
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+  }
+
 
             post {
                 always {
