@@ -1,55 +1,45 @@
 pipeline {
     agent any
-
-    tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-        maven "maven3"
-        dockerTool "myDocker"
-
-    }
-
-    stages {
-        stage('VCS') {
-            steps {
-                // Get some code from a GitHub repository
-                git 'https://github.com/manigarg/ci_test.git'
-
-                // To run Maven on a Windows agent, use
-                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
-            }
+    environment {
+        registry = "manigarg/hello-world-webapp"
+        registryCredential = 'dockerhub'
+        dockerImage = ''
         }
-        stage('Deploy') {
+    stages {
+        stage('Initialize'){
             steps {
                 script {
-                    withDockerRegistry(url: 'https://172.20.10.5:5000') {
-
-                        // Build and Push
-                        def webAppImage = docker.build("manigarg/hello-world-webapp:latest");
-                        webAppImage.push();
+                    def dockerHome = tool 'myDocker'
+                    env.PATH = "${dockerHome}/bin:${env.PATH}"
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    git branch: 'master' ,url: 'https://github.com/manigarg31/ci_test.git'
+                    dockerImage = docker.build registry + ":latest"
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
                     }
                 }
             }
-        }
-        stage('response') {
-            steps {
-                script {
-                    def response = httpRequest 'http://localhost:8080/jenkins/api/json?pretty=true'
-                    println("Status: "+response.status)
-                    println("Content: "+response.content)
 
+            post {
+                always {
+                    sh '''
+                    format="\n*->* %s *(%cr) <%cn>*";
+                    commit_messages="$(git log -1 --format="$format")";
+
+                    message="${message}\n*JOB_NAME* : ${JOB_NAME} [${BUILD_DISPLAY_NAME}]";
+                    message="${message}\n*COMMIT_MESSAGES* : $commit_messages";
+                    message="${message}\n***********************************************";
+                    echo ${message};
+                    
+                    curl -X POST https://api.flock.com/hooks/sendMessage/89da56ff-3a24-4e5a-96e8-8f032a1e32c5 -H "Content-Type: application/json" -d "{ 'notification' : '$(getNotification started)', 'text' : '${message}' }";
+                    '''
                 }
             }
         }
     }
-    post {
-        // If Maven was able to run the tests, even if some of the test
-        // failed, record the test results and archive the jar file.
-        success {
-            echo "Success"
-        }
-        failure {
-            echo "Failure! Duh!"
-        }
-    }
 }
-
