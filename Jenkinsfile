@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git 'https://github.com/manigarg31/ci_test.git'
+        git branch: 'mani', url: 'https://github.com/manigarg31/ci_test.git'
       }
     }
     stage('Building image') {
@@ -26,13 +26,7 @@ pipeline {
           }
         }
       }
-    }
-    stage('Remove Unused docker image') {
-      steps{
-        sh "docker rmi $registry:$BUILD_NUMBER"
-      }
-    }
-    post {
+      post {
             always {
                 sh '''
                 format="\n*->* %s *(%cr) <%cn>*";
@@ -48,7 +42,15 @@ pipeline {
             }
         }
 
+    }
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+    
   }
 }
+
 
 
