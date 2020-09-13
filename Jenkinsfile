@@ -37,9 +37,9 @@ pipeline {
                     format="\n*->* %s *(%cr) <%cn>*";
                     commit_messages="$(git log -1 --format="$format")";
 
-                    message="${message}\n'project_name': $JOB_NAME";
-                    message="${message}\n*'build_commit': $env.GIT_COMMIT";
-                    message="${message}\n'build_number': $env.BUILD_NUMBER";
+                    message="${message}\n'project_name': '$JOB_NAME'";
+                    message="${message}\n*'build_commit': '$env.GIT_COMMIT'";
+                    message="${message}\n'build_number': '$env.BUILD_NUMBER'";
                     message="${message}\n'status': 'SUCCESS'";
                     echo ${message};
                     
