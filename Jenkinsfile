@@ -36,9 +36,6 @@ pipeline {
         }
         success {
                 sh '''
-                    format="\n*->* %s *(%cr) <%cn>*";
-                    commit_messages="$(git log -1 --format="$format")";
-
                     message="${message}\n{"project_name": "$JOB_NAME", "build_commit": "$GIT_COMMIT", "build_number": "$BUILD_NUMBER",  "status": "SUCCESS"}";
                     echo ${message};
                     
@@ -47,9 +44,6 @@ pipeline {
         }
         failure {
             sh '''
-                    format="\n*->* %s *(%cr) <%cn>*";
-                    commit_messages="$(git log -1 --format="$format")";
-
                     message="${message}\n{"project_name": "$JOB_NAME", "build_commit": "$GIT_COMMIT", "build_number": "$BUILD_NUMBER",  "status": "FAILURE"}";
                     echo ${message};
                     
