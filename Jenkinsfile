@@ -9,12 +9,12 @@ pipeline {
     gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'mani', type: 'PT_BRANCH'
   }
   stages {
-    stage('Cloning Git') {
-      steps {
-        sh 'git checkout ${GIT_BRANCH}'
-        git branch: "${params.BRANCH}" , url: 'https://github.com/manigarg31/ci_test.git'
-      }
-    }
+    // stage('Cloning Git') {
+    //   steps {
+    //     sh 'git checkout ${GIT_BRANCH}'
+    //     git branch: "${params.BRANCH}" , url: 'https://github.com/manigarg31/ci_test.git'
+    //   }
+    // }
     stage('Building image') {
       steps{
         script {
