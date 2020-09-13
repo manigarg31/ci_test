@@ -33,10 +33,32 @@ pipeline {
             echo """{"project_name": "$JOB_NAME", "build_commit": "$env.GIT_COMMIT", "build_number": "$env.BUILD_NUMBER",  "status": "FAILURE"}"""
         }
         success {
-            httpRequest customHeaders: [[maskValue: false, name: 'Content-Type', value: 'application/json']], httpMode: 'POST', requestBody: "{'project_name': '$JOB_NAME', 'build_commit': '$env.GIT_COMMIT', 'build_number': '$env.BUILD_NUMBER',  'status': 'SUCCESS'}", responseHandle: 'NONE', url: 'https://api.flock.com/hooks/sendMessage/89da56ff-3a24-4e5a-96e8-8f032a1e32c5', wrapAsMultipart: false
+                sh '''
+                    format="\n*->* %s *(%cr) <%cn>*";
+                    commit_messages="$(git log -1 --format="$format")";
+
+                    message="${message}\n'project_name': $JOB_NAME";
+                    message="${message}\n*'build_commit': $env.GIT_COMMIT";
+                    message="${message}\n'build_number': $env.BUILD_NUMBER";
+                    message="${message}\n'status': 'SUCCESS'";
+                    echo ${message};
+                    
+                    curl -X POST https://api.flock.com/hooks/sendMessage/89da56ff-3a24-4e5a-96e8-8f032a1e32c5 -H "Content-Type: application/json" -d "{ 'notification' : '$(getNotification started)', 'text' : '${message}' }";
+                '''
         }
         failure {
-            httpRequest customHeaders: [[maskValue: false, name: 'Content-Type', value: 'application/json']], httpMode: 'POST', requestBody: "{'project_name': '$JOB_NAME', 'build_commit': '$env.GIT_COMMIT', 'build_number': '$env.BUILD_NUMBER',  'status': 'FAILED'}", responseHandle: 'NONE', url: 'https://api.flock.com/hooks/sendMessage/89da56ff-3a24-4e5a-96e8-8f032a1e32c5', wrapAsMultipart: false
+            sh '''
+                    format="\n*->* %s *(%cr) <%cn>*";
+                    commit_messages="$(git log -1 --format="$format")";
+
+                    message="${message}\n'project_name': $JOB_NAME";
+                    message="${message}\n*'build_commit': $env.GIT_COMMIT";
+                    message="${message}\n'build_number': $env.BUILD_NUMBER";
+                    message="${message}\n'status': 'FAILURE'";
+                    echo ${message};
+                    
+                    curl -X POST https://api.flock.com/hooks/sendMessage/89da56ff-3a24-4e5a-96e8-8f032a1e32c5 -H "Content-Type: application/json" -d "{ 'notification' : '$(getNotification started)', 'text' : '${message}' }";
+                '''
         }
     }
     }
